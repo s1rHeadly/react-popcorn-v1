@@ -3,19 +3,19 @@ import { useState, useEffect, useRef } from "react";
 // import {tempMovieData, tempWatchedData} from './data.js' // temp data
 import {average} from './helpers.js'; // helpers
 
+import { useMovies } from "./useMovies.js";
+
+
+
 
 const APIKEY = process.env.REACT_APP_APIKEY; // .env will not print to the console if we try to do it
 
 
+
 export default function App() {
   // state for all movies and movies watched
-  const [movies, setMovies] = useState([]);
- // const [watched, setWatched] = useState([]);
-
-  // state for the fetch requests
   const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
+
 
   // state for selecting the id of the movie when clicked
   const [selectedId, setSelectedId] = useState(null);
@@ -69,66 +69,68 @@ useEffect(() => {
 },[watched]);
 
 
-useEffect(() => {
+// useEffect(() => {
 
-  const controller = new AbortController(); // abort controller for the race condition
+//   const controller = new AbortController(); // abort controller for the race condition
 
-    const getMovieData = async() => {
+//     const getMovieData = async() => {
 
-      setIsLoading(true);
+//       setIsLoading(true);
 
-       try {
+//        try {
 
-        // create  the fetch request and add the controller
-        const response = await fetch(`https://www.omdbapi.com/?s=${searchTerm}&apikey=${APIKEY}`, {
-          signal: controller.signal 
-        }); 
+//         // create  the fetch request and add the controller
+//         const response = await fetch(`https://www.omdbapi.com/?s=${searchTerm}&apikey=${APIKEY}`, {
+//           signal: controller.signal 
+//         }); 
 
-        if(!response.ok){
-          throw new Error('Something went wrong')
-        }
-        // set error to empty string if none exists
-        setError('');
+//         if(!response.ok){
+//           throw new Error('Something went wrong')
+//         }
+//         // set error to empty string if none exists
+//         setError('');
 
 
-        const data = await response.json();
-        if(data.Response === 'False'){
-          throw new Error('No movie found')
-        }
+//         const data = await response.json();
+//         if(data.Response === 'False'){
+//           throw new Error('No movie found')
+//         }
        
-        // set the data from the api to the movies
-        setMovies(data.Search)
+//         // set the data from the api to the movies
+//         setMovies(data.Search)
 
-       } catch (error) {
-        if (error.name !== "AbortError") {
-          console.log(error.message);
-          setError(error.message);
-        }
+//        } catch (error) {
+//         if (error.name !== "AbortError") {
+//           console.log(error.message);
+//           setError(error.message);
+//         }
 
-       }finally{
-        setIsLoading(false) // set the isLoading to false
-       }
-
-
-       // if the search Term is less than 3 chars it will keep the viewport clear
-       if(searchTerm.length < 3){
-        setMovies([]);
-        setError('');
-        return;
-       }
-    }
-
-    // call the function (make sure its inside the useEffect!!!)
-    getMovieData();
+//        }finally{
+//         setIsLoading(false) // set the isLoading to false
+//        }
 
 
-      // cleanup funtion for race condition
-      return(() => {
-        controller.abort();
-       })
+//        // if the search Term is less than 3 chars it will keep the viewport clear
+//        if(searchTerm.length < 3){
+//         setMovies([]);
+//         setError('');
+//         return;
+//        }
+//     }
 
-}, [searchTerm]) // dependancy array holds the searchTerm as this is updated
+//     // call the function (make sure its inside the useEffect!!!)
+//     getMovieData();
 
+
+//       // cleanup funtion for race condition
+//       return(() => {
+//         controller.abort();
+//        })
+
+// }, [searchTerm]) // dependancy array holds the searchTerm as this is updated
+
+
+const { movies,isLoading, error } = useMovies(searchTerm, APIKEY);
   return (
     <>
       
